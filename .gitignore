@@ -1,0 +1,17 @@
+#######################
+# VS Generated files #
+#######################
+.vs
+
+
+#######################
+# UE4 Generated files #
+#######################
+Binaries
+Build
+DerivedDataCache
+Intermediate
+
+Saved
+
+Content/StarterContent
