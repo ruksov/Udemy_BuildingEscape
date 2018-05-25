@@ -1,10 +1,16 @@
 // Copyritsh Ruksov Yegor 2018.
 
 #include "OpenDoor.h"
-#include "GameFramework/Actor.h"
+#include "Engine/World.h"
 
 // Sets default values for this component's properties
 UOpenDoor::UOpenDoor()
+    : PressurePlate(nullptr)
+    , TriggerActor(nullptr)
+    , Owner(nullptr)
+    , DoorCloseDelay(1.f)
+    , DoorLastOpenTime(0.f)
+    
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -19,14 +25,22 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Find the owning Actor
-    auto Owner = GetOwner();
+    Owner = GetOwner();
+    APlayerController* PawnController = GetWorld()->GetFirstPlayerController();
+    if (PawnController != nullptr)
+    {
+        TriggerActor = PawnController->GetPawn();
+    }
+}
 
-    // Create new rotator
-    FRotator NewRotator(0.0f, -90.0f, 0.0f);
+void UOpenDoor::OpenDoor()
+{
+    Owner->SetActorRotation(FRotator (0.f, OpenAngle, 0.f));
+}
 
-    // Set owner rotation
-    Owner->SetActorRotation(NewRotator);
+void UOpenDoor::CloseDoor()
+{
+    Owner->SetActorRotation(FRotator (0.f, 0.f, 0.f));
 }
 
 
@@ -35,6 +49,19 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+    float CurrentTime = GetWorld()->GetTimeSeconds();
+
+	// Poll the Trigger Volume
+    // If TriggerActor is in the volume
+    if (PressurePlate && PressurePlate->IsOverlappingActor(TriggerActor))
+    {
+        OpenDoor();
+        DoorLastOpenTime = CurrentTime;
+    }
+
+    if (CurrentTime - DoorLastOpenTime > DoorCloseDelay)
+    {
+        CloseDoor();
+    }
 }
 
