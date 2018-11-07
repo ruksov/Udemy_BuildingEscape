@@ -2,7 +2,7 @@
 # VS Generated files #
 #######################
 .vs
-
+*.sln
 
 #######################
 # UE4 Generated files #
